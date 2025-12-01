@@ -963,11 +963,7 @@ http://fast.luckonline.eu/Ali130225/Cpyej2JL56Xy/593
 
 
 #EXTINF:-1 tvg-id="Sony Max HD" tvg-logo="https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_MAX_HD/images/LOGO_HD/image.png" group-title="Movies", Sony MAX
-https://allottplay.com/tv/toffee/live.php?id=sony_max&e=.m3u8|Referer=https://allottplay.com/tv/toffee/live.php?id=sony_max&e=.m3u8
-
-
-
-#EXTINF:-1 tvg-id="Sony Max HD" tvg-logo="https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_MAX_HD/images/LOGO_HD/image.png" group-title="Movies", Sony MAX
+https://allottplay.com/tv/toffee/live.php?id=sony_max_hd&e=.m3u8
 https://allottplay.com/tv/toffee/live.php?id=sony_max_hd&e=.m3u8|Referer=https://allottplay.com/tv/toffee/live.php?id=sony_max_hd&e=.m3u8
 
 
@@ -1968,4 +1964,5 @@ https://ottb.live.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/ck8h9qqlfr/o
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=59a51164c2c915352f04066a06f6e807:eba5cc362d1d63c0fe6460febca0fd11
+
 https://OTTB.live.cf.ww.aiv-cdn.net/PDX/clients/dash/enc/0f5clvxn6o/out/v1/d5a953bb19734fa3baa1776266887fcb/cenc.mpd
