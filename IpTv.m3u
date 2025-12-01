@@ -360,6 +360,8 @@ http://smart.bengaldigital.live/sun-bangla-paid/index.m3u8
 
 
 #EXTINF:-1 tvg-logo="https://i.ibb.co.com/88Xwqpx/Star-Jalsha-logo-2023.png" group-title="",Star Jalsha
+https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeebanglacinema/default/manifest.mp
+https://tiger-hub.vercel.app/Star-jalsha/tracks-v1a1/mono.ts.m3u8
 http://main.epgmaker.com/Ali130225/Cpyej2JL56Xy/534
 http://link.luckonline.eu/live/Ali130225/Cpyej2JL56Xy/3527.ts
 http://fast.luckonline.eu/Ali130225/Cpyej2JL56Xy/534
@@ -367,7 +369,6 @@ https://xfireflix.fun/file/opplex/playlist.m3u?id=245898&e=.m3u8
 http://87.255.35.150:18237
 http://agh2019.xyz/SOFIANBENAISSA/X7KJL94/34726
 https://live.dinesh29.com.np/stream/jiotvplus/starjalshahd/master.m3u8
-https://tiger-hub.vercel.app/Star-jalsha/tracks-v1a1/mono.ts.m3u8
 https://tvsen5.aynaott.com/gUX8BJmNc2yF/tracks-v1a1/mono.ts.m3u8
 http://webo.asia:80/live/6992/2996/791616.ts
 
@@ -1967,4 +1968,5 @@ https://ottb.live.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/ck8h9qqlfr/o
 #KODIPROP:inputstream.adaptive.license_key=59a51164c2c915352f04066a06f6e807:eba5cc362d1d63c0fe6460febca0fd11
 
 https://OTTB.live.cf.ww.aiv-cdn.net/PDX/clients/dash/enc/0f5clvxn6o/out/v1/d5a953bb19734fa3baa1776266887fcb/cenc.mpd
+
 
