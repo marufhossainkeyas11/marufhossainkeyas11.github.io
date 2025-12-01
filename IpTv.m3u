@@ -976,6 +976,7 @@ http://stvlive.net:8080/sonymax/index.m3u8
 http://main.epgmaker.com/Ali130225/Cpyej2JL56Xy/1366
 
 #EXTINF:-1 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGxnZNR0oQ1i0Y8aBjEtvjZMCWM7Ht25yU8W1B67DDaxYmF5TRwmWsNVS35zSsFWg6O64&usqp=CAU" ,SONY MAX 2 HD
+https://allottplay.com/tv/toffee/live.php?id=sonymax_2&e=.m3u8
 http://fast.luckonline.eu/Ali130225/Cpyej2JL56Xy/602
 
 
@@ -1966,3 +1967,4 @@ https://ottb.live.cf.ww.aiv-cdn.net/pdx-nitro/live/clients/dash/enc/ck8h9qqlfr/o
 #KODIPROP:inputstream.adaptive.license_key=59a51164c2c915352f04066a06f6e807:eba5cc362d1d63c0fe6460febca0fd11
 
 https://OTTB.live.cf.ww.aiv-cdn.net/PDX/clients/dash/enc/0f5clvxn6o/out/v1/d5a953bb19734fa3baa1776266887fcb/cenc.mpd
+
