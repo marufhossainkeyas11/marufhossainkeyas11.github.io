@@ -1,13 +1,10 @@
-// api/m3u.js  — Vercel Serverless Function
-// Fetches token for each channel from iptvidn.com and returns a full M3U playlist
+// api/m3u.js — Vercel Serverless Function (CommonJS)
 
-const MAIN_URL   = "http://iptvidn.com/";
+const MAIN_URL    = "http://iptvidn.com/";
 const LIVE_SERVER = "http://103.89.248.30:8082/";
-const TOKEN_RE   = /token=[^&\s"']+/;
+const TOKEN_RE    = /token=[^&\s"']+/;
 
-// ── channel list parsed from iptvidn.com HTML ──────────────────────────────
 const CHANNELS = [
-  // [streamId, name, imgFile, category]
   ["1LIVE","Live 1","Live1.jpeg","Live Sports"],
   ["2LIVE","Live 2","Live2.jpeg","Live Sports"],
   ["LIVE-CRICKET","Live Cricket","LIVE-CRICKET.jpg","Live Sports"],
@@ -73,7 +70,6 @@ const CHANNELS = [
   ["JALSHA-MOVIES","Jalsha Movies","jalshamovies.jpg","Bangla"],
   ["Star_jalsha","Star Jalsha","starjalsha.jpg","Bangla"],
   ["zee-bangla","Zee Bangla HD","zeebanglahd.jpg","Bangla"],
-  ["GAZI-TV","Gazi TV","gazi.jpg","Bangla"],
   ["RONGEEN-TV","Rongeen TV","rongeen.jpg","Bangla"],
   ["GLOBAL-TV","Global TV","globaltv.jpg","Bangla"],
   ["DESH","Desh TV","deshtv.jpg","Bangla"],
@@ -156,59 +152,57 @@ const CHANNELS = [
   ["9X-JALWA","9X Jalwa","9xjalwa.jpg","Music"],
   ["B4U-MUSIC","B4U Music","b4umusic.jpg","Music"],
   ["xite-music","Xite Music","Xitemusic.jpeg","Music"],
+  ["GAZI-TV","Gazi TV","gazi.jpg","Bangla"],
 ];
 
 async function fetchToken(streamId) {
-  const url = `${MAIN_URL}play.php?stream=${streamId}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000); // 8s timeout per channel
   try {
-    const res = await fetch(url, {
+    const res = await fetch(`${MAIN_URL}play.php?stream=${streamId}`, {
+      signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
         "Referer": MAIN_URL,
       },
-      redirect: "follow",
     });
+    clearTimeout(timer);
     const text = await res.text();
-    const match = TOKEN_RE.exec(text);
-    return match ? match[0] : null;
+    const m = TOKEN_RE.exec(text);
+    return m ? m[0] : null;
   } catch {
+    clearTimeout(timer);
     return null;
   }
 }
 
-export default async function handler(req, res) {
-  // CORS
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  // Optional: filter by single channel  ?stream=NTV
-  const single = req.query.stream || null;
+  const single = req.query && req.query.stream ? req.query.stream : null;
   const targets = single
     ? CHANNELS.filter(([id]) => id.toLowerCase() === single.toLowerCase())
     : CHANNELS;
 
   const lines = ["#EXTM3U"];
 
-  // Fetch tokens in parallel (max 10 at a time to be polite)
-  const chunkSize = 10;
-  for (let i = 0; i < targets.length; i += chunkSize) {
-    const chunk = targets.slice(i, i + chunkSize);
-    await Promise.all(
-      chunk.map(async ([streamId, name, imgFile, category]) => {
-        const logoUrl = `${MAIN_URL}assets/images/${imgFile}`;
-        const token   = await fetchToken(streamId);
-        if (!token) return;
-        const m3u8 = `${LIVE_SERVER}${streamId}/index.fmp4.m3u8?${token}`;
-        lines.push(
-          `#EXTINF:-1 tvg-id="${streamId}" tvg-name="${name}" tvg-logo="${logoUrl}" group-title="${category}",${name}`,
-          m3u8
-        );
-      })
-    );
-  }
+  // All channels in parallel — fastest approach within 60s limit
+  const results = await Promise.allSettled(
+    targets.map(async ([streamId, name, imgFile, category]) => {
+      const token = await fetchToken(streamId);
+      if (!token) return null;
+      const logoUrl = `${MAIN_URL}assets/images/${encodeURIComponent(imgFile)}`;
+      const m3u8   = `${LIVE_SERVER}${streamId}/index.fmp4.m3u8?${token}`;
+      return `#EXTINF:-1 tvg-id="${streamId}" tvg-name="${name}" tvg-logo="${logoUrl}" group-title="${category}",${name}\n${m3u8}`;
+    })
+  );
 
-  res.setHeader("Content-Type", "audio/mpegurl");
+  results.forEach(r => {
+    if (r.status === "fulfilled" && r.value) lines.push(r.value);
+  });
+
+  res.setHeader("Content-Type", "audio/mpegurl; charset=utf-8");
   res.setHeader("Content-Disposition", 'attachment; filename="iptvidn.m3u"');
-  res.status(200).send(lines.join("\n") + "\n");
-}
+  return res.status(200).send(lines.join("\n") + "\n");
+};
