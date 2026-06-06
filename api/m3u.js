@@ -1,8 +1,11 @@
 // api/m3u.js — Vercel Serverless Function (CommonJS)
+// Token regex fixed from extension's content.js
 
-const MAIN_URL    = "http://iptvidn.com/";
+const MAIN_URL    = "http://iptvidn.com";
 const LIVE_SERVER = "http://103.89.248.30:8082/";
-const TOKEN_RE    = /token=[^&\s"']+/;
+
+// ✅ Extension এর exact regex — embed.html?token=...
+const TOKEN_RE = /embed\.html\?token=([^&"'\s]+)/;
 
 const CHANNELS = [
   ["1LIVE","Live 1","Live1.jpeg","Live Sports"],
@@ -70,6 +73,7 @@ const CHANNELS = [
   ["JALSHA-MOVIES","Jalsha Movies","jalshamovies.jpg","Bangla"],
   ["Star_jalsha","Star Jalsha","starjalsha.jpg","Bangla"],
   ["zee-bangla","Zee Bangla HD","zeebanglahd.jpg","Bangla"],
+  ["GAZI-TV","Gazi TV","gazi.jpg","Bangla"],
   ["RONGEEN-TV","Rongeen TV","rongeen.jpg","Bangla"],
   ["GLOBAL-TV","Global TV","globaltv.jpg","Bangla"],
   ["DESH","Desh TV","deshtv.jpg","Bangla"],
@@ -152,24 +156,28 @@ const CHANNELS = [
   ["9X-JALWA","9X Jalwa","9xjalwa.jpg","Music"],
   ["B4U-MUSIC","B4U Music","b4umusic.jpg","Music"],
   ["xite-music","Xite Music","Xitemusic.jpeg","Music"],
-  ["GAZI-TV","Gazi TV","gazi.jpg","Bangla"],
 ];
 
 async function fetchToken(streamId) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000); // 8s timeout per channel
+  const timer = setTimeout(() => controller.abort(), 8000);
   try {
-    const res = await fetch(`${MAIN_URL}play.php?stream=${streamId}`, {
+    const res = await fetch(`${MAIN_URL}/play.php?stream=${streamId}`, {
       signal: controller.signal,
+      redirect: "follow",
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
-        "Referer": MAIN_URL,
+        "Referer": MAIN_URL + "/",
+        "Accept": "text/html,*/*",
       },
     });
     clearTimeout(timer);
+    if (!res.ok) return null;
     const text = await res.text();
+
+    // ✅ Extension এর exact pattern: embed.html?token=ABC123
     const m = TOKEN_RE.exec(text);
-    return m ? m[0] : null;
+    return m ? `token=${m[1]}` : null;
   } catch {
     clearTimeout(timer);
     return null;
@@ -180,6 +188,32 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   if (req.method === "OPTIONS") return res.status(200).end();
 
+  // Debug: ?debug=STREAM_ID — raw HTML দেখাবে
+  if (req.query && req.query.debug) {
+    try {
+      const r = await fetch(`${MAIN_URL}/play.php?stream=${req.query.debug}`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "Referer": MAIN_URL + "/",
+        },
+        redirect: "follow",
+      });
+      const txt = await r.text();
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      // token খোঁজা
+      const m = TOKEN_RE.exec(txt);
+      return res.status(200).send(
+        `HTTP STATUS: ${r.status}\n` +
+        `TOKEN FOUND: ${m ? m[1] : "NOT FOUND"}\n\n` +
+        `--- RAW HTML (first 3000 chars) ---\n` +
+        txt.substring(0, 3000)
+      );
+    } catch(e) {
+      res.setHeader("Content-Type", "text/plain");
+      return res.status(200).send(`FETCH ERROR: ${e.message}`);
+    }
+  }
+
   const single = req.query && req.query.stream ? req.query.stream : null;
   const targets = single
     ? CHANNELS.filter(([id]) => id.toLowerCase() === single.toLowerCase())
@@ -187,12 +221,11 @@ module.exports = async function handler(req, res) {
 
   const lines = ["#EXTM3U"];
 
-  // All channels in parallel — fastest approach within 60s limit
   const results = await Promise.allSettled(
     targets.map(async ([streamId, name, imgFile, category]) => {
       const token = await fetchToken(streamId);
       if (!token) return null;
-      const logoUrl = `${MAIN_URL}assets/images/${encodeURIComponent(imgFile)}`;
+      const logoUrl = `${MAIN_URL}/assets/images/${imgFile}`;
       const m3u8   = `${LIVE_SERVER}${streamId}/index.fmp4.m3u8?${token}`;
       return `#EXTINF:-1 tvg-id="${streamId}" tvg-name="${name}" tvg-logo="${logoUrl}" group-title="${category}",${name}\n${m3u8}`;
     })
