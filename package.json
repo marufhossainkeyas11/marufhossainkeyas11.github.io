@@ -1,0 +1,6 @@
+{
+  "name": "iptvidn-m3u",
+  "version": "1.0.0",
+  "description": "IPTVIDN M3U playlist generator",
+  "private": true
+}

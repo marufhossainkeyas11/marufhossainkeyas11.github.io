@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "functions": {
+    "api/m3u.js": {
+      "maxDuration": 60
+    }
+  },
+  "routes": [
+    { "src": "/m3u", "dest": "/api/m3u" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
